@@ -14,7 +14,7 @@ POOL_URL = ''
 WALLET_ADDRESS = '5V7oGDhTS3xRHRPtoQyUpXx5ncqPQyaiWMiVD4ST6aMycHrvfrw69GhcmrrAUzmDYb9ToUjnpnrkadZccHBPNKcT'
 WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
-NOUNCES = [[]]
+NOUNCES = []
 
 
 def update_work(work_item, work_item_lock, hash_rates):
@@ -88,9 +88,9 @@ def submit_share(nonce, argon, pool_address):
 def update_nouce_list():
     NOUNCES.clear()
     for w in range(WORKER_COUNT):
-        NOUNCES.append(w)
+        NOUNCES.append([])
         for i in range(100):
-            NOUNCES[w].append(re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
+            NOUNCES[-1].append(re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
                 random.getrandbits(256).to_bytes(32,
             byteorder='big')).decode('utf-8')))
         else:
