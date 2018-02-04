@@ -14,6 +14,7 @@ POOL_URL = ''
 WALLET_ADDRESS = '4boSzKSto9SqkZFxExYXhC4UnPrqqzvQ78QjABSSqXTA2JixFU1g9tBmkGZPzKtQNeDkhkvS7vmED1KuSFY33Egc'
 WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
+NOUNCES = []
 
 
 def update_work(work_item, work_item_lock, hash_rates):
@@ -84,6 +85,16 @@ def submit_share(nonce, argon, pool_address):
             print("submit_share failed after 5 attempts\n")
 
 
+def update_nouce_list():
+    NOUNCES.clear()
+    for i in range(100)
+        NOUNCES.append(base64.b64encode(
+            random.getrandbits(256).to_bytes(32,
+                                             byteorder='big')).decode('utf-8'))
+    else:
+       print("NOUNCES list updated") 
+
+
 def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
     work_count = 0
     time_start = time.time()
@@ -91,9 +102,10 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         with work_item_lock:
             (block, difficulty, limit, pool_address) = work_item
 
-        nonce = base64.b64encode(
-            random.getrandbits(256).to_bytes(32,
-                                             byteorder='big')).decode('utf-8')
+        nonce = NOUNCES[work_count]
+            #base64.b64encode(
+            #random.getrandbits(256).to_bytes(32,
+            #                                 byteorder='big')).decode('utf-8')
         nonce = re.sub('[^a-zA-Z0-9]', '', nonce)
         base = '%s-%s-%s-%s' % (pool_address, nonce, block, difficulty)
         ph = argon2.PasswordHasher(
@@ -123,6 +135,7 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         if work_count == 100:
             work_count = 0
             time_start = time_end
+            update_nouce_list()
             if index == 0:
                 print('%f H/s - %d workers' % (sum(hash_rates),
                                                len(hash_rates)))
@@ -133,6 +146,7 @@ def main():
     global WALLET_ADDRESS
     global WORKER_NAME
     global WORKER_COUNT
+    global NOUNCES
 
     parser = argparse.ArgumentParser(description='Arionum pool miner')
     parser.add_argument(
@@ -161,6 +175,7 @@ def main():
     print("Launching miner with worker name: ", WORKER_NAME)
     print("Mining to wallet: ", WALLET_ADDRESS)
 
+    update_nouce_list()
     with multiprocessing.Manager() as manager:
         hash_rates = manager.Array('f', range(WORKER_COUNT))
         work_item = manager.list([None for _ in range(4)])
