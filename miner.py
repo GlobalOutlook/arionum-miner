@@ -93,8 +93,8 @@ def update_nouce_list():
             NOUNCES[-1].append(re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
                 random.getrandbits(256).to_bytes(32,
             byteorder='big')).decode('utf-8')))
-        else:
-            print("NOUNCES list updated") 
+    else:
+        print("NOUNCES list updated") 
 
 
 def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
