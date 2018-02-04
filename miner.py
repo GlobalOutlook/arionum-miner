@@ -11,7 +11,7 @@ import requests
 import time
 
 POOL_URL = ''
-WALLET_ADDRESS = '4boSzKSto9SqkZFxExYXhC4UnPrqqzvQ78QjABSSqXTA2JixFU1g9tBmkGZPzKtQNeDkhkvS7vmED1KuSFY33Egc'
+WALLET_ADDRESS = '5V7oGDhTS3xRHRPtoQyUpXx5ncqPQyaiWMiVD4ST6aMycHrvfrw69GhcmrrAUzmDYb9ToUjnpnrkadZccHBPNKcT'
 WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
 NOUNCES = []
