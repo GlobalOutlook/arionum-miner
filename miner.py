@@ -14,7 +14,7 @@ POOL_URL = ''
 WALLET_ADDRESS = '5V7oGDhTS3xRHRPtoQyUpXx5ncqPQyaiWMiVD4ST6aMycHrvfrw69GhcmrrAUzmDYb9ToUjnpnrkadZccHBPNKcT'
 WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
-NOUNCES = []
+NOUNCES = [[]]
 
 
 def update_work(work_item, work_item_lock, hash_rates):
@@ -87,12 +87,14 @@ def submit_share(nonce, argon, pool_address):
 
 def update_nouce_list():
     NOUNCES.clear()
-    for i in range(100):
-        NOUNCES.append(re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
-            random.getrandbits(256).to_bytes(32,
-        byteorder='big')).decode('utf-8')))
-    else:
-       print("NOUNCES list updated") 
+    for w in range(WORKER_COUNT):
+        NOUNCES.append(w)
+        for i in range(100):
+            NOUNCES[w].append(re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
+                random.getrandbits(256).to_bytes(32,
+            byteorder='big')).decode('utf-8')))
+        else:
+            print("NOUNCES list updated") 
 
 
 def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
@@ -102,7 +104,7 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         with work_item_lock:
             (block, difficulty, limit, pool_address) = work_item
 
-        nonce = NOUNCES[work_count]
+        nonce = NOUNCES[index][work_count]
             #base64.b64encode(
             #random.getrandbits(256).to_bytes(32,
             #                                 byteorder='big')).decode('utf-8')
@@ -135,8 +137,8 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         if work_count == 100:
             work_count = 0
             time_start = time_end
-            update_nouce_list()
             if index == 0:
+                update_nouce_list()
                 print('%f H/s - %d workers' % (sum(hash_rates),
                                                len(hash_rates)))
 
