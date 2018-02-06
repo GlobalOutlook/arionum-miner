@@ -15,6 +15,8 @@ WALLET_ADDRESS = '5V7oGDhTS3xRHRPtoQyUpXx5ncqPQyaiWMiVD4ST6aMycHrvfrw69GhcmrrAUz
 WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
 NOUNCES = []
+SHARES = 0
+SUBMISSIONS = ''
 
 
 def update_work(work_item, work_item_lock, hash_rates):
@@ -75,13 +77,17 @@ def submit_share(nonce, argon, pool_address):
                 timeout=1)
             r.raise_for_status()
             share_submitted = True
+            SHARES += 1
+            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share:\n", r.json()
             print("submit_share:\n", r.json())
     except Exception as e:
+        SUBMISSIONS = SUBMISSIONS + "\nsubmit_share failed, retry in 5s:\n"
         print("submit_share failed, retry in 5s:\n", e)
         retry_count += 1
         time.sleep(5)
     finally:
         if retry_count == 5:
+            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share failed after 5 attempts\n" 
             print("submit_share failed after 5 attempts\n")
 
 
@@ -139,8 +145,8 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
             time_start = time_end
             if index == 0:
                 update_nouce_list()
-                print('%f H/s - %d workers' % (sum(hash_rates),
-                                               len(hash_rates)))
+                print('%f H/s - %d workers - Submissions: %d (%s)' % (sum(hash_rates),
+                                               len(hash_rates), SHARES, SUBMISSIONS))
 
 
 def main():
@@ -149,6 +155,8 @@ def main():
     global WORKER_NAME
     global WORKER_COUNT
     global NOUNCES
+    global SHARES
+    global SUBMISSIONS
 
     parser = argparse.ArgumentParser(description='Arionum pool miner')
     parser.add_argument(
@@ -178,6 +186,8 @@ def main():
     print("Mining to wallet: ", WALLET_ADDRESS)
 
     update_nouce_list()
+    SHARES = 0
+    SUBMISSIONS = ''
     with multiprocessing.Manager() as manager:
         hash_rates = manager.Array('f', range(WORKER_COUNT))
         work_item = manager.list([None for _ in range(4)])
