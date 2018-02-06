@@ -110,12 +110,9 @@ def build_nouce_list():
 
 def update_nouce_list_all():
     for w in range(WORKER_COUNT):
-        for i in range(100):
-            NOUNCES[w][i] = re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
-                 random.getrandbits(256).to_bytes(32,
-                 byteorder='big')).decode('utf-8'))
+        update_nouce_list(w)
     else:
-        print("NOUNCES list updated") 
+        print("NOUNCES list updated for all") 
 
 def update_nouce_list(worker_id):
     for i in range(100):
@@ -169,8 +166,8 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         if work_count == 100:
             work_count = 0
             time_start = time_end
+            update_nouce_list(index)
             if index == 0:
-                update_nouce_list()
                 print('%f H/s - %d workers - Shares submitted: %d (%s)' % (sum(hash_rates),
                                                len(hash_rates), SHARES, SUBMISSIONS))
 
