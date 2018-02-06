@@ -116,8 +116,9 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
             #                                 byteorder='big')).decode('utf-8')
         #nonce = re.sub('[^a-zA-Z0-9]', '', nonce)
         base = '%s-%s-%s-%s' % (pool_address, nonce, block, difficulty)
-        ph = argon2.PasswordHasher(
-            time_cost=4, memory_cost=16384, parallelism=4)
+        #ph = argon2.PasswordHasher(
+        #   time_cost=4, memory_cost=16384, parallelism=4)
+        ph = argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1)
         argon = ph.hash(base)
         base = base + argon
         hash = hashlib.sha512(base.encode('utf-8'))
