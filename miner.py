@@ -186,6 +186,7 @@ def main():
     global NOUNCES
     global SHARES
     global SUBMISSIONS
+    global PASSHASHER
 
     parser = argparse.ArgumentParser(description='Arionum pool miner')
     parser.add_argument(
