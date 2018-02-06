@@ -125,6 +125,7 @@ def update_nouce_list(worker_id):
 
 def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
     work_count = 0
+    update_nouce_list(index)
     time_start = time.time()
     while (True):
         with work_item_lock:
