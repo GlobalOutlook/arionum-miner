@@ -17,6 +17,7 @@ WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
 NOUNCES = []
 SHARES = 0
 SUBMISSIONS = ''
+PASSHASHER = []
 
 
 def update_work(work_item, work_item_lock, hash_rates):
@@ -91,6 +92,31 @@ def submit_share(nonce, argon, pool_address):
             print("submit_share failed after 5 attempts\n")
 
 
+def build_passhasher_list():
+    PASSHASHER.clear()
+    for w in range(WORKER_COUNT):
+        PASSHASHER.append(argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1))
+    else:
+        print("PASSHASHER list built") 
+
+def build_nouce_list():
+     NOUNCES.clear()
+     for w in range(WORKER_COUNT):
+         NOUNCES.append([])
+         for i in range(100):
+            NOUNCES[-1].append('')
+    else:
+        print("NOUNCES list built") 
+
+def update_nouce_list():
+    for w in range(WORKER_COUNT):
+        for i in range(100):
+            NOUNCES[w][i] = re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
+                 random.getrandbits(256).to_bytes(32,
+                 byteorder='big')).decode('utf-8'))
+     else:
+         print("NOUNCES list updated") 
+
 def update_nouce_list():
     NOUNCES.clear()
     for w in range(WORKER_COUNT):
@@ -118,8 +144,10 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         base = '%s-%s-%s-%s' % (pool_address, nonce, block, difficulty)
         #ph = argon2.PasswordHasher(
         #   time_cost=4, memory_cost=16384, parallelism=4)
-        ph = argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1)
-        argon = ph.hash(base)
+        #ph = argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1)
+        #argon = ph.hash(base)
+        argon = PASSHASHER[index].hash(base)
+
         base = base + argon
         hash = hashlib.sha512(base.encode('utf-8'))
         for i in range(4):
@@ -186,6 +214,8 @@ def main():
     print("Launching miner with worker name: ", WORKER_NAME)
     print("Mining to wallet: ", WALLET_ADDRESS)
 
+    build_passhasher_list()
+    build_nouce_list()
     update_nouce_list()
     SHARES = 0
     SUBMISSIONS = ''
