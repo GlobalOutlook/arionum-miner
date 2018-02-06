@@ -100,10 +100,10 @@ def build_passhasher_list():
         print("PASSHASHER list built") 
 
 def build_nouce_list():
-     NOUNCES.clear()
-     for w in range(WORKER_COUNT):
-         NOUNCES.append([])
-         for i in range(100):
+    NOUNCES.clear()
+    for w in range(WORKER_COUNT):
+        NOUNCES.append([])
+        for i in range(100):
             NOUNCES[-1].append('')
     else:
         print("NOUNCES list built") 
@@ -114,8 +114,8 @@ def update_nouce_list():
             NOUNCES[w][i] = re.sub('[^a-zA-Z0-9]', '', base64.b64encode(
                  random.getrandbits(256).to_bytes(32,
                  byteorder='big')).decode('utf-8'))
-     else:
-         print("NOUNCES list updated") 
+    else:
+        print("NOUNCES list updated") 
 
 def update_nouce_list():
     NOUNCES.clear()
