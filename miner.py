@@ -59,7 +59,7 @@ def update_work(work_item, work_item_lock, hash_rates):
 
 
 def submit_share(nonce, argon, pool_address):
-    argon = argon[29:]
+    argon = argon[30:]
     print("submit_share: %s, %s" % (nonce, argon))
     share_submitted = False
     try:
@@ -145,7 +145,7 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
             time_start = time_end
             if index == 0:
                 update_nouce_list()
-                print('%f H/s - %d workers - Submissions: %d (%s)' % (sum(hash_rates),
+                print('%f H/s - %d workers - Shares submitted: %d (%s)' % (sum(hash_rates),
                                                len(hash_rates), SHARES, SUBMISSIONS))
 
 
