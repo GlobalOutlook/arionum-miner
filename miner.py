@@ -140,9 +140,9 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
         base = '%s-%s-%s-%s' % (pool_address, nonce, block, difficulty)
         #ph = argon2.PasswordHasher(
         #   time_cost=4, memory_cost=16384, parallelism=4)
-        #ph = argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1)
-        #argon = ph.hash(base)
-        argon = PASSHASHER[index].hash(base)
+        ph = argon2.PasswordHasher(time_cost=1, memory_cost=524288, parallelism=1)
+        argon = ph.hash(base)
+        #argon = PASSHASHER[index].hash(base)
 
         base = base + argon
         hash = hashlib.sha512(base.encode('utf-8'))
@@ -215,7 +215,7 @@ def main():
     build_nouce_list()
     #update_nouce_list_all()
     SHARES = 0
-    SUBMISSIONS = ''
+    SUBMISSIONS = ""
     with multiprocessing.Manager() as manager:
         hash_rates = manager.Array('f', range(WORKER_COUNT))
         work_item = manager.list([None for _ in range(4)])
