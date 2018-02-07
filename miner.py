@@ -79,7 +79,7 @@ def submit_share(nonce, argon, pool_address):
             r.raise_for_status()
             share_submitted = True
             SHARES += 1
-            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share:\n", r.json()
+            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share: " + r.json()
             print("submit_share:\n", r.json())
     except Exception as e:
         SUBMISSIONS = SUBMISSIONS + "\nsubmit_share failed, retry in 5s:\n"
@@ -108,6 +108,7 @@ def build_nouce_list():
     else:
         print("NOUNCES list built") 
 
+# Not used
 def update_nouce_list_all():
     for w in range(WORKER_COUNT):
         update_nouce_list(w)
@@ -212,7 +213,7 @@ def main():
 
     build_passhasher_list()
     build_nouce_list()
-    update_nouce_list_all()
+    #update_nouce_list_all()
     SHARES = 0
     SUBMISSIONS = ''
     with multiprocessing.Manager() as manager:
