@@ -16,7 +16,8 @@ WORKER_NAME = hashlib.sha224((os.uname()[1]).encode("utf-8")).hexdigest()[0:32]
 WORKER_COUNT = math.ceil((multiprocessing.cpu_count() + 1) / 2)
 NOUNCES = []
 SHARES = 0
-SUBMISSIONS = ''
+FAILS = 0 
+RETRIES = 0
 PASSHASHER = []
 
 
@@ -79,16 +80,15 @@ def submit_share(nonce, argon, pool_address):
             r.raise_for_status()
             share_submitted = True
             SHARES += 1
-            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share: " + r.json()
             print("submit_share:\n", r.json())
     except Exception as e:
-        SUBMISSIONS = SUBMISSIONS + "\nsubmit_share failed, retry in 5s:\n"
         print("submit_share failed, retry in 5s:\n", e)
-        retry_count += 1
+        retry_count += 1 
+        RETRIES += 1
         time.sleep(5)
     finally:
         if retry_count == 5:
-            SUBMISSIONS = SUBMISSIONS + "\nsubmit_share failed after 5 attempts\n" 
+            FAILS += 1
             print("submit_share failed after 5 attempts\n")
 
 
@@ -170,8 +170,8 @@ def solve_work(index, work_item, work_item_lock, result_queue, hash_rates):
             time_start = time_end
             update_nouce_list(index)
             if index == 0:
-                print('%f H/s - %d workers - Shares submitted: %d (%s)' % (sum(hash_rates),
-                                               len(hash_rates), SHARES, SUBMISSIONS))
+                print('%f H/s - %d workers - Shares submitted: %d, Failures: %d, Retries: %d' % (sum(hash_rates),
+                                               len(hash_rates), SHARES, FAILS, RETRIES))
 
 
 def main():
@@ -181,7 +181,8 @@ def main():
     global WORKER_COUNT
     global NOUNCES
     global SHARES
-    global SUBMISSIONS
+    global FAILS
+    global RETRIES
     global PASSHASHER
 
     parser = argparse.ArgumentParser(description='Arionum pool miner')
@@ -211,11 +212,12 @@ def main():
     print("Launching miner with worker name: ", WORKER_NAME)
     print("Mining to wallet: ", WALLET_ADDRESS)
 
-    build_passhasher_list()
+    #build_passhasher_list()
     build_nouce_list()
     #update_nouce_list_all()
     SHARES = 0
-    SUBMISSIONS = ""
+    FAILS = 0
+    RETRIES = 0
     with multiprocessing.Manager() as manager:
         hash_rates = manager.Array('f', range(WORKER_COUNT))
         work_item = manager.list([None for _ in range(4)])
